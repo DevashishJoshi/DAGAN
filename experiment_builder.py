@@ -105,6 +105,7 @@ class ExperimentBuilder(object):
             self.disc_iter = 5
             self.gen_iter = 1
             best_d_val_loss = np.inf
+            best_exp_no = -1
 
             if self.spherical_interpolation:
                 dim = int(np.sqrt(self.num_generations)*2)
@@ -279,7 +280,16 @@ class ExperimentBuilder(object):
                         val_save_path = self.train_saver.save(sess, "{}/val_saved_model_{}_{}.ckpt".format(
                             self.saved_models_filepath,
                             self.experiment_name, e))
-                        print("Saved current best val model at", val_save_path)
+                        print("Saved current best val model at ", val_save_path)
+                        if best_exp_no!=-1:
+                            os.remove("{}/val_saved_model_{}_{}.ckpt".format(
+                            self.saved_models_filepath,
+                            self.experiment_name, best_exp_no))
+                            print("Deleted model ", "{}/val_saved_model_{}_{}.ckpt".format(
+                            self.saved_models_filepath,
+                            self.experiment_name, best_exp_no))
+                        best_exp_no=e
+                            
 
                     save_statistics(self.log_path, [e, total_d_train_loss_mean, total_d_val_loss_mean,
                                                 total_d_train_loss_std, total_d_val_loss_std,
