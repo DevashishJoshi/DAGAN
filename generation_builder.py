@@ -97,13 +97,13 @@ class ExperimentBuilder(object):
 
             with tqdm.tqdm(total=self.total_gen_batches) as pbar_samp:
                 for i in range(self.total_gen_batches):
-                    x_gen_a = self.data.get_gen_batch()
+                    x_gen_a, index = self.data.get_gen_batch()
                     sample_two_dimensions_generator(sess=sess,
                                                     same_images=self.same_images,
                                                     inputs=x_gen_a,
                                                     data=self.data, batch_size=self.batch_size, z_input=self.z_input,
-                                                    file_name="{}/generation_z_spherical_{}".format(self.save_image_path,
-                                                                                                  self.experiment_name),
+                                                    file_name="{}/generation_z_spherical_{}_cat_index_{}".format(self.save_image_path,
+                                                                                                  self.experiment_name, index),
                                                     input_a=self.input_x_i, training_phase=self.training_phase,
                                                     dropout_rate=self.dropout_rate,
                                                     dropout_rate_value=self.dropout_rate_value,

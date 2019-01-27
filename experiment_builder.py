@@ -242,7 +242,7 @@ class ExperimentBuilder(object):
 
                     with tqdm.tqdm(total=self.total_gen_batches) as pbar_samp:
                         for i in range(self.total_gen_batches):
-                            x_gen_a = self.data.get_gen_batch()
+                            x_gen_a, index = self.data.get_gen_batch()
                             sample_generator(num_generations=self.num_generations, sess=sess,
                                              same_images=self.same_images,
                                              inputs=x_gen_a,

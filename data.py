@@ -118,11 +118,14 @@ class DAGANDataset(object):
         Provides a batch that contains data to be used for generation
         :return: A data batch to use for generation
         """
+        index = None
         if self.indexes["gen"] >= self.batch_size * self.gen_batches:
             self.indexes["gen"] = 0
         x_input_batch_a = self.datasets["gen"][self.indexes["gen"]:self.indexes["gen"]+self.batch_size]
+        index = self.indexes["gen"]
         self.indexes["gen"] += self.batch_size
-        return self.preprocess_data(x_input_batch_a)
+        #print("Selected batch of images from {} to {}".format(self.indexes["gen"], self.indexes["gen"]+self.batch_size))
+        return self.preprocess_data(x_input_batch_a), index
 
     def get_multi_batch(self, dataset_name):
         """
@@ -131,14 +134,15 @@ class DAGANDataset(object):
         :return: Two batches (i.e. x_i and x_j) of size [num_gpus, batch_size, im_height, im_width, im_channels). If
         the set is "gen" then we only return a single batch (i.e. x_i)
         """
+        index = None
         x_input_a_batch = []
         x_input_b_batch = []
         if dataset_name == "gen":
-            x_input_a = self.get_next_gen_batch()
+            x_input_a, index = self.get_next_gen_batch()
             for n_batch in range(self.num_of_gpus):
                 x_input_a_batch.append(x_input_a)
             x_input_a_batch = np.array(x_input_a_batch)
-            return x_input_a_batch
+            return x_input_a_batch, index
         else:
             for n_batch in range(self.num_of_gpus):
                 x_input_a, x_input_b = self.get_batch(dataset_name)
@@ -179,8 +183,8 @@ class DAGANDataset(object):
         Provides a gen batch
         :return: Returns a single data batch (i.e. x_i) to be used for generation on unseen data
         """
-        x_input_a = self.get_multi_batch("gen")
-        return x_input_a
+        x_input_a, index = self.get_multi_batch("gen")
+        return x_input_a, index
 
 class DAGANImbalancedDataset(DAGANDataset):
     def __init__(self, batch_size, last_training_class_index, reverse_channels, num_of_gpus, gen_batches):
