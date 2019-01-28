@@ -1,7 +1,7 @@
 import utils.interpolations as interpolations
 import numpy as np
 import tqdm
-from utils.storage import save_statistics, build_experiment_folder
+from utils.storage import save_statistics, build_experiment_folder, load_statistics
 from tensorflow.contrib import slim
 
 from dagan_networks_wgan import *
@@ -85,6 +85,8 @@ class ExperimentBuilder(object):
             self.val_saver = tf.train.Saver()
 
             start_from_epoch = 0
+            best_d_val_loss_from_ckp = None
+
             if self.continue_from_epoch!=-1:
                 start_from_epoch = self.continue_from_epoch
                 checkpoint = "{}train_saved_model_{}_{}.ckpt".format(self.saved_models_filepath, self.experiment_name, self.continue_from_epoch)
@@ -100,12 +102,22 @@ class ExperimentBuilder(object):
                     variables_to_restore,
                     ignore_missing_vars=True)
                 fine_tune(sess)
+                data_dict = load_statistics(self.log_path)
+
+                if len(data_dict["total_d_val_loss_mean"]) == 0:        # This is a workaround, delete this later
+                    data_dict_last_value = -40
+                else:
+                    data_dict_last_value = data_dict["total_d_val_loss_mean"][-1]   # But keep this
+
+                best_d_val_loss_from_ckp = data_dict_last_value
 
             self.iter_done = 0
             self.disc_iter = 5
             self.gen_iter = 1
             best_d_val_loss = np.inf
-            best_exp_no = -1
+
+            if best_d_val_loss_from_ckp != None:
+                best_d_val_loss = best_d_val_loss_from_ckp
 
             if self.spherical_interpolation:
                 dim = int(np.sqrt(self.num_generations)*2)
@@ -280,16 +292,7 @@ class ExperimentBuilder(object):
                         val_save_path = self.train_saver.save(sess, "{}/val_saved_model_{}_{}.ckpt".format(
                             self.saved_models_filepath,
                             self.experiment_name, e))
-                        print("Saved current best val model at ", val_save_path)
-                        if best_exp_no!=-1:
-                            os.remove("{}/val_saved_model_{}_{}.ckpt".format(
-                            self.saved_models_filepath,
-                            self.experiment_name, best_exp_no))
-                            print("Deleted model ", "{}/val_saved_model_{}_{}.ckpt".format(
-                            self.saved_models_filepath,
-                            self.experiment_name, best_exp_no))
-                        best_exp_no=e
-                            
+                        print("Saved current best val model at", val_save_path)
 
                     save_statistics(self.log_path, [e, total_d_train_loss_mean, total_d_val_loss_mean,
                                                 total_d_train_loss_std, total_d_val_loss_std,
