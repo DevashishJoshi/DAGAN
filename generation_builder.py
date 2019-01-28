@@ -1,4 +1,4 @@
-import utils.interpolations
+import utils.interpolations as interpolations
 import tqdm
 from utils.storage import *
 from tensorflow.contrib import slim
@@ -74,8 +74,7 @@ class ExperimentBuilder(object):
             self.writer = tf.summary.FileWriter(self.log_path, graph=tf.get_default_graph())
             self.saver = tf.train.Saver()
             if self.continue_from_epoch != -1:
-                checkpoint = "{}/{}_{}.ckpt".format(self.saved_models_filepath, self.experiment_name,
-                                                    self.continue_from_epoch)
+                checkpoint = "{}train_saved_model_{}_{}.ckpt".format(self.saved_models_filepath, self.experiment_name, self.continue_from_epoch)
                 variables_to_restore = []
                 for var in tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES):
                     print(var)
@@ -97,13 +96,13 @@ class ExperimentBuilder(object):
 
             with tqdm.tqdm(total=self.total_gen_batches) as pbar_samp:
                 for i in range(self.total_gen_batches):
-                    x_gen_a, index = self.data.get_gen_batch()
+                    x_gen_a = self.data.get_gen_batch()
                     sample_two_dimensions_generator(sess=sess,
                                                     same_images=self.same_images,
                                                     inputs=x_gen_a,
                                                     data=self.data, batch_size=self.batch_size, z_input=self.z_input,
-                                                    file_name="{}/generation_z_spherical_{}_cat_index_{}".format(self.save_image_path,
-                                                                                                  self.experiment_name, index),
+                                                    file_name="{}/generation_z_spherical_{}".format(self.save_image_path,
+                                                                                                  self.experiment_name),
                                                     input_a=self.input_x_i, training_phase=self.training_phase,
                                                     dropout_rate=self.dropout_rate,
                                                     dropout_rate_value=self.dropout_rate_value,
