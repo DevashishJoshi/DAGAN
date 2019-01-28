@@ -57,6 +57,8 @@ def sample_two_dimensions_generator(sess, same_images, inputs,
     row_num_generations = int(np.sqrt(num_generations))
     column_num_generations = int(np.sqrt(num_generations))
 
+    print('\n'+str(z_vectors[0])+'\n')
+    
     input_images, generated = sess.run(same_images, feed_dict={input_a: inputs, dropout_rate: dropout_rate_value,
                                                                   training_phase: False,
                                                                   z_input: batch_size*[z_vectors[0]]})
