@@ -10,7 +10,7 @@ def save_statistics(log_path, line_to_add, log_name="experiment_log.csv", create
             writer = csv.writer(f)
             writer.writerow(line_to_add)
 
-def load_statistics(log_path, log_name="experiment_log"):
+def load_statistics(log_path, log_name="experiment_log.csv"):
     data_dict = dict()
     with open("{}/{}".format(log_path, log_name), 'r') as f:
         lines = f.readlines()
