@@ -59,7 +59,7 @@ class ExperimentBuilder(object):
         self.total_train_batches = data.training_data_size / (self.batch_size * self.num_gpus)
         self.total_val_batches = data.validation_data_size / (self.batch_size * self.num_gpus)
         self.total_test_batches = data.testing_data_size / (self.batch_size * self.num_gpus)
-        self.total_gen_batches = data.generation_data_size / (self.batch_size * self.num_gpus)
+        self.total_gen_batches = int (data.generation_data_size / (self.batch_size * self.num_gpus))
         self.init = tf.global_variables_initializer()
         self.spherical_interpolation = True
 
